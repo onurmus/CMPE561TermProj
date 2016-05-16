@@ -7,8 +7,11 @@ import java.io.UnsupportedEncodingException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
 
 /**
  * Hello world!
@@ -21,6 +24,12 @@ public class App
 	
 	//keep unigrams in the form word : count
 	static Map<String,Integer> uniGramMap;
+
+	//drunk features in the form feature : count
+	static Map<String,Double> drunkFeatures;
+
+	//sober features in the form feature : count
+	static Map<String,Double> soberFeatures;
 	
     public static void main( String[] args ) throws SQLException, FileNotFoundException, UnsupportedEncodingException
     {
@@ -133,6 +142,54 @@ public class App
     	return dsf;
     }
     
+    public static HashMap<String,Integer> parseTweetFeatures(String tweet){
+    	String[] tokens = tweet.split("\\s");
+
+    	HashMap<String,Integer> features = new HashMap<String,Integer>();
+
+    	int hasRepeatedCharacters = 0; //Boolean feature indicating whether a character is repeated three times consecutively. (0 means False, 1 means True)
+    	int capitalCount = 0; //Number of capital letters in the tweet
+    	int length = 0; //Number of words in the tweet
+    	int hasEmoticon = 0; //Boolean feature indicating whether an emoticon is present in the tweet
+    	String[] emoticons = {":)", ":d", ":D", ":P", ":p", "xd", "xD", ":(", "x)", ":o", ":O", ":'(", ":/"};
+    	
+    	for (int i=0; i<tokens.length; i++) {
+    		String t = tokens[i];
+
+    		int repeatCounter = 0;
+    		capitalCount = 0;
+
+    		//Capital counts and repeatedCharacter feature is determined in this for loop
+			for(int j=1; j<t.length(); j++) {
+
+				if(Character.isUpperCase(t.charAt(j))){
+					capitalCount++;
+				}
+
+   				if(t.charAt(j) == t.charAt(j-1)) {
+      				repeatCounter++;
+      				if(repeatCounter == 3){
+      					hasRepeatedCharacters = 1; //boolean value is true now
+      				}
+   				}
+   				else{
+   					repeatCounter = 0;
+   				}
+			}
+
+			//hasEmoticon feature is determined here
+			hasEmoticon = (Collections.disjoint(Arrays.asList(tokens), Arrays.asList(emoticons))) ? 0 : 1; // if two lists are disjoint set hasEmoticon 
+																										   // to 0 (False) else set it to 1 (True)
+
+    	}
+
+    	features.put("hasRepeatedCharacters", hasRepeatedCharacters);
+    	features.put("capitalisation", capitalCount);
+    	features.put("length", tokens.length);
+    	features.put("hasEmoticon", hasEmoticon);
+    	
+    	return features;
+    }
 
     
     
