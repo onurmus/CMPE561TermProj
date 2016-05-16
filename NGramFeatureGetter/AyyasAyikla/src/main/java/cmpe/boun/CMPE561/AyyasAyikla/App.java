@@ -9,6 +9,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
+
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 
 /**
@@ -23,12 +25,24 @@ public class App
 	//keep unigrams in the form word : count
 	static Map<String,Integer> uniGramMap;
 	
+	static public ArrayList<TweetFeatures> drunkDocs;
+	static public ArrayList<TweetFeatures> soberDocs;
+	
     public static void main( String[] args ) throws SQLException, FileNotFoundException, UnsupportedEncodingException
     {
     	DBConnection conn = new DBConnection();
 		conn.startConnection();
 		
-		ResultSet ds1Rs = conn.getDataSet2Drunk();
+		ReadFeatures rf = new ReadFeatures("1");
+		drunkDocs = rf.drunkDocs;
+		soberDocs = rf.soberDocs;
+		
+		System.out.println("drunk size : " + drunkDocs.size() + " sober size : " +soberDocs.size());
+		System.out.println("drunk : " + drunkDocs.get(1000).posAdjToAdv + "  " +drunkDocs.get(1000).posNounToAdj + " "+drunkDocs.get(1000).capitalCount);
+    }
+    
+    private static void getPOSTags(DBConnection conn) throws FileNotFoundException, UnsupportedEncodingException, SQLException{
+    	ResultSet ds1Rs = conn.getDataSet2Drunk();
 		
 		String saveFileName = "curTweet.txt";
 		MaxentTagger tagger = new MaxentTagger("models/english-left3words-distsim.tagger");
@@ -93,7 +107,6 @@ public class App
     	out.close();
     	
     	System.out.println("bitti");
-		
     }
     
     
