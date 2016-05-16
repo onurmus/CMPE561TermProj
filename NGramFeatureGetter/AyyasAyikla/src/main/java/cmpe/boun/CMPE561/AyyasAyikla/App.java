@@ -30,7 +30,7 @@ public class App
     	DBConnection conn = new DBConnection();
 		conn.startConnection();
 		
-		ResultSet ds1Rs = conn.getDataSet2();
+		ResultSet ds1Rs = conn.getDataSet2Sober();
 		
 		System.out.println("db den okudum");
 		
@@ -63,7 +63,7 @@ public class App
 		
 		System.out.println("parse işlemi bitti size is " + count);
 		
-		printHashMaps("ds2");
+		printHashMaps("ds2Sober");
 		
 		System.out.println(" bitti ");
 		

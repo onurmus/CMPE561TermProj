@@ -68,10 +68,42 @@ public class DBConnection {
 		
 		return ds1;
 	}
+
+    public ResultSet getDataSet1Drunk() throws SQLException{
+
+    	String query = "SELECT * FROM dataset1 where hashtag in ('drunk','drank','imdrunk')";		
+		ResultSet ds1 =this.getStmt().executeQuery(query);
+		
+		return ds1;
+	}
+    
+    public ResultSet getDataSet1Sober() throws SQLException{
+
+    	String query = "SELECT * FROM dataset1 where hashtag in ('notdrunk','imnotdrunk','sober')";			
+		ResultSet ds1 =this.getStmt().executeQuery(query);
+		
+		return ds1;
+	}
     
     public ResultSet getDataSet2() throws SQLException{
 		
     	String query = "SELECT * FROM dataset2v2";		
+		ResultSet ds1 =this.getStmt().executeQuery(query);
+		
+		return ds1;
+	}
+    
+    public ResultSet getDataSet2Drunk() throws SQLException{
+		
+    	String query = "SELECT * FROM `dataset2v2` WHERE hashtag in ('drunk','drank','imdrunk')";		
+		ResultSet ds1 =this.getStmt().executeQuery(query);
+		
+		return ds1;
+	}
+    
+    public ResultSet getDataSet2Sober() throws SQLException{
+		
+    	String query = "SELECT * FROM `dataset2v2` WHERE hashtag = '' ";		
 		ResultSet ds1 =this.getStmt().executeQuery(query);
 		
 		return ds1;
