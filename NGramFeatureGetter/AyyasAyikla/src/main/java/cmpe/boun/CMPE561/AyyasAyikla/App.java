@@ -37,8 +37,10 @@ public class App
 		drunkDocs = rf.drunkDocs;
 		soberDocs = rf.soberDocs;
 		
-		System.out.println("drunk size : " + drunkDocs.size() + " sober size : " +soberDocs.size());
-		System.out.println("drunk : " + drunkDocs.get(1000).posAdjToAdv + "  " +drunkDocs.get(1000).posNounToAdj + " "+drunkDocs.get(1000).capitalCount);
+		//System.out.println("drunk size : " + drunkDocs.size() + " sober size : " +soberDocs.size());
+		//System.out.println("drunk : " + drunkDocs.get(1000).posAdjToAdv + "  " +drunkDocs.get(1000).posNounToAdj + " "+drunkDocs.get(1000).capitalCount);
+
+		RocchioAlgotihm ra = new RocchioAlgotihm(drunkDocs,soberDocs);
     }
     
     private static void getPOSTags(DBConnection conn) throws FileNotFoundException, UnsupportedEncodingException, SQLException{

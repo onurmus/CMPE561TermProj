@@ -5,10 +5,10 @@ public class TweetFeatures {
 	public double posNounToAdj;
 	public double posNounToAdv;
 	public double posAdjToAdv;
-	public int repeatedChars;
-	public int capitalCount;
-	public int wordCount;
-	public int emoticonCount;
+	public double repeatedChars;
+	public double capitalCount;
+	public double wordCount;
+	public double emoticonCount;
 	
 	public TweetFeatures(){
 		posNounToAdj = 0;
