@@ -5,7 +5,7 @@ public class TweetFeatures {
 	public double posNounToAdj;
 	public double posNounToAdv;
 	public double posAdjToAdv;
-	public boolean repeatedChars;
+	public int repeatedChars;
 	public int capitalCount;
 	public int wordCount;
 	public int emoticonCount;
@@ -14,7 +14,7 @@ public class TweetFeatures {
 		posNounToAdj = 0;
 		posNounToAdv = 0;
 		posAdjToAdv = 0;
-		repeatedChars = false;
+		repeatedChars = 0;
 		capitalCount = 0;
 		wordCount = 0;
 		emoticonCount = 0;

@@ -51,12 +51,8 @@ public class ReadFeatures {
 				curFeat.capitalCount = capitalCount;
 				curFeat.emoticonCount = emoticonCount;
 				curFeat.wordCount = wordCount;
-				
-				if(hasRepeatedCharInt == 0){
-					curFeat.repeatedChars = false;
-				}else{
-					curFeat.repeatedChars = true;
-				}
+				curFeat.repeatedChars = hasRepeatedCharInt;
+
 				featVector.add(curFeat);
 			}else{
 				TweetFeatures curFeat = featVector.get(index);
@@ -64,12 +60,8 @@ public class ReadFeatures {
 				curFeat.capitalCount = capitalCount;
 				curFeat.emoticonCount = emoticonCount;
 				curFeat.wordCount = wordCount;
+				curFeat.repeatedChars = hasRepeatedCharInt;
 				
-				if(hasRepeatedCharInt == 0){
-					curFeat.repeatedChars = false;
-				}else{
-					curFeat.repeatedChars = true;
-				}
 				featVector.set(index, curFeat);
 			}
 		}
