@@ -7,11 +7,9 @@ import java.io.UnsupportedEncodingException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
+import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 
 /**
  * Hello world!
@@ -24,50 +22,119 @@ public class App
 	
 	//keep unigrams in the form word : count
 	static Map<String,Integer> uniGramMap;
-
-	//drunk features in the form feature : count
-	static Map<String,Double> drunkFeatures;
-
-	//sober features in the form feature : count
-	static Map<String,Double> soberFeatures;
 	
     public static void main( String[] args ) throws SQLException, FileNotFoundException, UnsupportedEncodingException
     {
-    	biGramMap = new HashMap<String,Integer>();
-    	uniGramMap = new HashMap<String,Integer>();
-    	
     	DBConnection conn = new DBConnection();
 		conn.startConnection();
+		
+		ResultSet ds1Rs = conn.getDataSet2Drunk();
+		
+		String saveFileName = "curTweet.txt";
+		MaxentTagger tagger = new MaxentTagger("models/english-left3words-distsim.tagger");
+		
+		PrintStream out = new PrintStream(new File("posDs2Drunk.txt"),"UTF-8");
+		
+		while(ds1Rs.next()){
+			String tweetStr = ds1Rs.getString("tweet");
+			String tweetId = ds1Rs.getString("tweetId");
+			
+			String[] strArr = parseTweet(tweetStr);
+			
+			String tweet = "";
+			for(int i=0;i<strArr.length; i++){
+				tweet += strArr[i]+" ";
+			}
+			
+			String taggedTweet = tagger.tagString(tweet);
+			//System.out.println(taggedTweet);
+			
+			String[] tagPairs = taggedTweet.split("\\s");
+			
+			int nounCounter = 0;
+			int adjCounter = 0;
+			int advCounter = 0;
+			for(int i=0 ; i<tagPairs.length; i++){				
+				int index = tagPairs[i].lastIndexOf("_");
+				
+				if(index == -1){
+					continue;
+				}
+				String[] pair = new String[]{tagPairs[i].substring(0, index),tagPairs[i].substring(index+1, tagPairs[i].length())};
+				
+				if(pair[1].equals("NN") || pair[1].equals("NNP") ||  pair[1].equals("NNPS") ||  pair[1].equals("NNS")){ //noun
+					nounCounter++;
+				}else if(pair[1].equals("JJ") || pair[1].equals("JJR") ||  pair[1].equals("JJS") ){//adjective
+					adjCounter++;
+				}else if(pair[1].equals("RB") ||pair[1].equals("RBR") ||pair[1].equals("RBS") ||pair[1].equals("WRB")){ //adverb
+					advCounter++;
+				}
+			}
+			
+			double NounToAdj = 0;
+			double NounToAdv = 0;
+			double AdvToAdj = 0;
+			if(nounCounter != 0 && adjCounter != 0){
+				NounToAdj = (double)nounCounter / adjCounter;
+			}
+			
+			if(nounCounter != 0 && advCounter != 0){
+				NounToAdv = (double)nounCounter / advCounter;
+			}
+
+			if(adjCounter != 0 && advCounter != 0){
+				AdvToAdj = (double)advCounter / adjCounter;
+			}
+			
+			out.println(tweetId + " : < "+ NounToAdj +" , "+ NounToAdv + " , " + AdvToAdj + " > ");
+			
+		}
+		
+    	out.close();
+    	
+    	System.out.println("bitti");
+		
+    }
+    
+    
+    private static void getNgramFeatures(DBConnection conn) throws SQLException, FileNotFoundException, UnsupportedEncodingException{
+    	biGramMap = new HashMap<String,Integer>();
+    	uniGramMap = new HashMap<String,Integer>();
 		
 		ResultSet ds1Rs = conn.getDataSet2Sober();
 		
 		System.out.println("db den okudum");
 		
 		int count = 0;
-		while(ds1Rs.next()){
-			String tweetStr = ds1Rs.getString("tweet");
-			String[] parsedStrings = parseTweet(tweetStr);
-			
-			for(int i =0 ; i< parsedStrings.length; i++){
-				if(uniGramMap.containsKey(parsedStrings[i])){
-					uniGramMap.put(parsedStrings[i],uniGramMap.get(parsedStrings[i])+1);
-				}else{
-					uniGramMap.put(parsedStrings[i],1);
-				}
+		try {
+			while(ds1Rs.next()){
+				String tweetStr = ds1Rs.getString("tweet");
+				String[] parsedStrings = parseTweet(tweetStr);
 				
-				if(i<parsedStrings.length-1){
-					String biGramToken = parsedStrings[i] + "-"+parsedStrings[i+1];
-					
-					if(biGramMap.containsKey(biGramToken)){
-						biGramMap.put(biGramToken,biGramMap.get(biGramToken)+1);
+				for(int i =0 ; i< parsedStrings.length; i++){
+					if(uniGramMap.containsKey(parsedStrings[i])){
+						uniGramMap.put(parsedStrings[i],uniGramMap.get(parsedStrings[i])+1);
 					}else{
-						biGramMap.put(biGramToken,1);
+						uniGramMap.put(parsedStrings[i],1);
 					}
+					
+					if(i<parsedStrings.length-1){
+						String biGramToken = parsedStrings[i] + "-"+parsedStrings[i+1];
+						
+						if(biGramMap.containsKey(biGramToken)){
+							biGramMap.put(biGramToken,biGramMap.get(biGramToken)+1);
+						}else{
+							biGramMap.put(biGramToken,1);
+						}
+					}
+					
 				}
 				
+				count++;
 			}
-			
-			count++;
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		System.out.println("parse işlemi bitti size is " + count);
@@ -75,7 +142,6 @@ public class App
 		printHashMaps("ds2Sober");
 		
 		System.out.println(" bitti ");
-		
     }
     
     private static void printHashMaps(String ds) throws FileNotFoundException, UnsupportedEncodingException{
@@ -142,54 +208,6 @@ public class App
     	return dsf;
     }
     
-    public static HashMap<String,Integer> parseTweetFeatures(String tweet){
-    	String[] tokens = tweet.split("\\s");
-
-    	HashMap<String,Integer> features = new HashMap<String,Integer>();
-
-    	int hasRepeatedCharacters = 0; //Boolean feature indicating whether a character is repeated three times consecutively. (0 means False, 1 means True)
-    	int capitalCount = 0; //Number of capital letters in the tweet
-    	int length = 0; //Number of words in the tweet
-    	int hasEmoticon = 0; //Boolean feature indicating whether an emoticon is present in the tweet
-    	String[] emoticons = {":)", ":d", ":D", ":P", ":p", "xd", "xD", ":(", "x)", ":o", ":O", ":'(", ":/"};
-    	
-    	for (int i=0; i<tokens.length; i++) {
-    		String t = tokens[i];
-
-    		int repeatCounter = 0;
-    		capitalCount = 0;
-
-    		//Capital counts and repeatedCharacter feature is determined in this for loop
-			for(int j=1; j<t.length(); j++) {
-
-				if(Character.isUpperCase(t.charAt(j))){
-					capitalCount++;
-				}
-
-   				if(t.charAt(j) == t.charAt(j-1)) {
-      				repeatCounter++;
-      				if(repeatCounter == 3){
-      					hasRepeatedCharacters = 1; //boolean value is true now
-      				}
-   				}
-   				else{
-   					repeatCounter = 0;
-   				}
-			}
-
-			//hasEmoticon feature is determined here
-			hasEmoticon = (Collections.disjoint(Arrays.asList(tokens), Arrays.asList(emoticons))) ? 0 : 1; // if two lists are disjoint set hasEmoticon 
-																										   // to 0 (False) else set it to 1 (True)
-
-    	}
-
-    	features.put("hasRepeatedCharacters", hasRepeatedCharacters);
-    	features.put("capitalisation", capitalCount);
-    	features.put("length", tokens.length);
-    	features.put("hasEmoticon", hasEmoticon);
-    	
-    	return features;
-    }
 
     
     
