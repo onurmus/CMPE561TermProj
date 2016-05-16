@@ -10,16 +10,14 @@ public class kNNAlgorithm {
 
 	public ArrayList<TweetFeatures> drunkDocs;
 	public ArrayList<TweetFeatures> soberDocs;
-	public TweetFeatures currentTweet;
 	
 	public HashMap<String, ArrayList<Double>> distances;
 
-	public int k;
+	public int kNN;
 	
 	public kNNAlgorithm(int k,ArrayList<TweetFeatures> drunkDocs,
-			ArrayList<TweetFeatures> soberDocs,TweetFeatures currentTweet){
-		this.k = k;
-		this.currentTweet = currentTweet;
+			ArrayList<TweetFeatures> soberDocs){
+		this.kNN = k;
 		this.soberDocs = soberDocs;
 		this.drunkDocs = drunkDocs;
 	}
@@ -28,9 +26,11 @@ public class kNNAlgorithm {
 		
 	}
 	
-	public String getClassOFTweet(){
+	public String getClassOFTweet(TweetFeatures currentTweet){
 		distances = new HashMap<String,ArrayList<Double>>(); // Hashmap of type tweetClass : distance
 
+		distances.put("drunk", new ArrayList<Double>());
+		distances.put("sober", new ArrayList<Double>());
 		for(int i=0; i<drunkDocs.size(); i++){
 			TweetFeatures dt = drunkDocs.get(i); //dt = current drunk tweet
 			TweetFeatures ct = currentTweet;
@@ -67,11 +67,11 @@ public class kNNAlgorithm {
 		Collections.reverse(drunkDistances); //sort in descending order
 		Collections.reverse(soberDistances); //sort in descending order
 
-		double[] max5 = new double[]{0.0, 0.0, 0.0, 0.0, 0.0};
+		double[] max5 = new double[kNN];
 		int i = 0;
 		int j = 0;
 		int k = 0;
-		while(k<5){
+		while(k<kNN){
 			if(drunkDistances.get(i) > soberDistances.get(j)){
 				max5[k] = drunkDistances.get(i);
 				i++;

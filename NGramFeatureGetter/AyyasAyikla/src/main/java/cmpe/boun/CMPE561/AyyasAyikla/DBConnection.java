@@ -108,6 +108,14 @@ public class DBConnection {
 		
 		return ds1;
 	}
+    
+    public ResultSet getDataSet3Drunk() throws SQLException{
+		
+    	String query = "SELECT * FROM `dataset3`";		
+		ResultSet ds1 =this.getStmt().executeQuery(query);
+		
+		return ds1;
+	}
 }
 	
 	

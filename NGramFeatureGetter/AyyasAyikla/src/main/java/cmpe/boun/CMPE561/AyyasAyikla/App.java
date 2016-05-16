@@ -40,7 +40,87 @@ public class App
 		//System.out.println("drunk size : " + drunkDocs.size() + " sober size : " +soberDocs.size());
 		//System.out.println("drunk : " + drunkDocs.get(1000).posAdjToAdv + "  " +drunkDocs.get(1000).posNounToAdj + " "+drunkDocs.get(1000).capitalCount);
 
-		RocchioAlgotihm ra = new RocchioAlgotihm(drunkDocs,soberDocs);
+		//RocchioAlgotihm rocchio = new RocchioAlgotihm(drunkDocs,soberDocs);
+		
+		kNNAlgorithm rocchio = new kNNAlgorithm(3,drunkDocs,soberDocs);
+		
+		MaxentTagger tagger = new MaxentTagger("models/english-left3words-distsim.tagger");
+		ResultSet ds1Rs = conn.getDataSet3Drunk();
+		
+		int match =0;
+		int notMatch = 0;
+		while(ds1Rs.next()){
+			
+			String tweetStr = ds1Rs.getString("tweet");
+			
+			String[] strArr = parseTweet(tweetStr);
+			
+			String tweet = "";
+			for(int i=0;i<strArr.length; i++){
+				tweet += strArr[i]+" ";
+			}
+			
+			String taggedTweet = tagger.tagString(tweet);
+			//System.out.println(taggedTweet);
+			
+			String[] tagPairs = taggedTweet.split("\\s");
+			
+			int nounCounter = 0;
+			int adjCounter = 0;
+			int advCounter = 0;
+			for(int i=0 ; i<tagPairs.length; i++){				
+				int index = tagPairs[i].lastIndexOf("_");
+				
+				if(index == -1){
+					continue;
+				}
+				String[] pair = new String[]{tagPairs[i].substring(0, index),tagPairs[i].substring(index+1, tagPairs[i].length())};
+				
+				if(pair[1].equals("NN") || pair[1].equals("NNP") ||  pair[1].equals("NNPS") ||  pair[1].equals("NNS")){ //noun
+					nounCounter++;
+				}else if(pair[1].equals("JJ") || pair[1].equals("JJR") ||  pair[1].equals("JJS") ){//adjective
+					adjCounter++;
+				}else if(pair[1].equals("RB") ||pair[1].equals("RBR") ||pair[1].equals("RBS") ||pair[1].equals("WRB")){ //adverb
+					advCounter++;
+				}
+			}
+			
+			double NounToAdj = 0;
+			double NounToAdv = 0;
+			double AdvToAdj = 0;
+			if(nounCounter != 0 && adjCounter != 0){
+				NounToAdj = (double)nounCounter / adjCounter;
+			}
+			
+			if(nounCounter != 0 && advCounter != 0){
+				NounToAdv = (double)nounCounter / advCounter;
+			}
+
+			if(adjCounter != 0 && advCounter != 0){
+				AdvToAdj = (double)advCounter / adjCounter;
+			}
+			
+			HashMap<String,Integer> map = parseTweetFeatures(tweetStr);
+			
+			TweetFeatures currentTweet = new TweetFeatures();
+			currentTweet.posAdjToAdv = AdvToAdj;
+			currentTweet.posNounToAdj = NounToAdj;
+			currentTweet.posNounToAdv = NounToAdv;
+			currentTweet.capitalCount = map.get("capitalCount");
+			currentTweet.repeatedChars = map.get("hasRepeatedCharacters");
+			currentTweet.wordCount = map.get("capitalCount");
+			currentTweet.emoticonCount = map.get("emoticonCount");
+			
+			String type = rocchio.getClassOFTweet(currentTweet);
+			if(type.equals("drunk")){
+				match++;
+			}else{
+				notMatch++;
+			}
+		}
+		
+		System.out.println("match = " + match + "  : not match " + notMatch);
+		
     }
     
     private static void getPOSTags(DBConnection conn) throws FileNotFoundException, UnsupportedEncodingException, SQLException{
@@ -110,6 +190,60 @@ public class App
     	
     	System.out.println("bitti");
     }
+    
+    
+    
+    public static HashMap<String,Integer> parseTweetFeatures(String tweet){
+        String[] tokens = tweet.split("\\s");
+
+        HashMap<String,Integer> features = new HashMap<String,Integer>();
+
+        int hasRepeatedCharacters = 0; //Boolean feature indicating whether a character is repeated three times consecutively. (0 means False, 1 means True)
+        int capitalCount = 0; //Number of capital letters in the tweet
+        int length = 0; //Number of words in the tweet
+        int emoticonCount = 0; //Number of emoticons in the tweet
+        String[] emoticons = {":)", ":d", ":D", ":P", ":p", "xd", "xD", ":(", "x)", ":o", ":O", ":'(", ":/"};
+        
+        for (int i=0; i<tokens.length; i++) {
+            String t = tokens[i];
+
+            int repeatCounter = 0;
+            capitalCount = 0;
+
+            //Capital counts and repeatedCharacter feature is determined in this for loop
+            for(int j=1; j<t.length(); j++) {
+
+                if(Character.isUpperCase(t.charAt(j))){
+                    capitalCount++;
+                }
+
+                if(t.charAt(j) == t.charAt(j-1)) {
+                    repeatCounter++;
+                    if(repeatCounter == 3){
+                        hasRepeatedCharacters = 1; //boolean value is true now
+                    }
+                }
+                else{
+                    repeatCounter = 0;
+                }
+            }
+
+            //hasEmoticon feature is determined here
+            for(int j=0; j<emoticons.length; j++){
+                if(t.contains(emoticons[j]))
+                    emoticonCount++;
+            }                                                                                                          // to 0 (False) else set it to 1 (True)
+
+        }
+
+        features.put("hasRepeatedCharacters", hasRepeatedCharacters);
+        features.put("capitalCount", capitalCount);
+        features.put("length", tokens.length);
+        features.put("emoticonCount", emoticonCount);
+        
+        return features;
+    }
+
     
     
     private static void getNgramFeatures(DBConnection conn) throws SQLException, FileNotFoundException, UnsupportedEncodingException{

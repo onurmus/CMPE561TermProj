@@ -38,8 +38,8 @@ public class RocchioAlgotihm {
 		
 		
 		TweetFeatures meanSober = new TweetFeatures();
-		for(int i=0; i<drunkDocs.size(); i++){
-			TweetFeatures current = drunkDocs.get(i);
+		for(int i=0; i<soberDocs.size(); i++){
+			TweetFeatures current = soberDocs.get(i);
 			meanSober.capitalCount += current.capitalCount;
 			meanSober.posNounToAdj += current.posNounToAdj;
 			meanSober.posNounToAdv += current.posNounToAdv;
@@ -49,13 +49,13 @@ public class RocchioAlgotihm {
 			meanSober.repeatedChars += current.repeatedChars;
 		}
 		
-		meanSober.capitalCount /= drunkDocs.size();
-		meanSober.posNounToAdj /= drunkDocs.size();
-		meanSober.posNounToAdv /= drunkDocs.size();
-		meanSober.posAdjToAdv /= drunkDocs.size();
-		meanSober.wordCount /= drunkDocs.size();
-		meanSober.emoticonCount /= drunkDocs.size();
-		meanSober.repeatedChars /= drunkDocs.size();
+		meanSober.capitalCount /= soberDocs.size();
+		meanSober.posNounToAdj /= soberDocs.size();
+		meanSober.posNounToAdv /= soberDocs.size();
+		meanSober.posAdjToAdv /= soberDocs.size();
+		meanSober.wordCount /= soberDocs.size();
+		meanSober.emoticonCount /= soberDocs.size();
+		meanSober.repeatedChars /= soberDocs.size();
 		
 		double distDrunk = Math.pow((meanDrunk.capitalCount-currentTweet.capitalCount), 2) +
 				Math.pow((meanDrunk.posNounToAdj-currentTweet.posNounToAdj), 2) +
