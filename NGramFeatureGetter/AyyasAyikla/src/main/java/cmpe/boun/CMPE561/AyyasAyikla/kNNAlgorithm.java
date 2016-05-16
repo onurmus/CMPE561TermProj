@@ -53,13 +53,10 @@ public class kNNAlgorithm {
 			TweetFeatures dt = soberDocs.get(i); //dt = current drunk tweet
 			TweetFeatures ct = currentTweet;
 
-			int repeatedCharsDT = (dt.repeatedChars) ? 1 : 0;
-			int repeatedCharsCT = (ct.repeatedChars) ? 1 : 0;
-
 			double distance = Math.pow((Math.pow((dt.posNounToAdj - ct.posNounToAdj),2) 
 					  + Math.pow((dt.posNounToAdv - ct.posNounToAdv),2)
 					  + Math.pow((dt.posAdjToAdv - ct.posAdjToAdv),2)
-					  + Math.pow((repeatedCharsDT - repeatedCharsCT),2)
+					  + Math.pow((dt.repeatedChars - ct.repeatedChars),2)
 					  + Math.pow((dt.capitalCount - ct.capitalCount),2)
 					  + Math.pow((dt.wordCount - ct.wordCount),2)
 					  + Math.pow((dt.emoticonCount - ct.emoticonCount),2)),1/7);
