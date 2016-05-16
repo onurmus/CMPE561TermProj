@@ -6,17 +6,18 @@ public class RocchioAlgotihm {
 	
 	public ArrayList<TweetFeatures> drunkDocs;
 	public ArrayList<TweetFeatures> soberDocs;
+	TweetFeatures meanDrunk;
+	TweetFeatures meanSober;
 		
 	public RocchioAlgotihm(ArrayList<TweetFeatures> drunkDocs,ArrayList<TweetFeatures> soberDocs){
 		this.soberDocs = soberDocs;
 		this.drunkDocs = drunkDocs;
+		
+		calculateCentroids();
 	}
 	
-	
-	public String getClassOFTweet(TweetFeatures currentTweet){
-		int numOfFeatures = 7;
-		
-		TweetFeatures meanDrunk = new TweetFeatures();
+	public void calculateCentroids(){
+		meanDrunk = new TweetFeatures();
 		for(int i=0; i<drunkDocs.size(); i++){
 			TweetFeatures current = drunkDocs.get(i);
 			meanDrunk.capitalCount += current.capitalCount;
@@ -37,7 +38,7 @@ public class RocchioAlgotihm {
 		meanDrunk.repeatedChars /= drunkDocs.size();
 		
 		
-		TweetFeatures meanSober = new TweetFeatures();
+		meanSober = new TweetFeatures();
 		for(int i=0; i<soberDocs.size(); i++){
 			TweetFeatures current = soberDocs.get(i);
 			meanSober.capitalCount += current.capitalCount;
@@ -56,6 +57,11 @@ public class RocchioAlgotihm {
 		meanSober.wordCount /= soberDocs.size();
 		meanSober.emoticonCount /= soberDocs.size();
 		meanSober.repeatedChars /= soberDocs.size();
+		
+	}
+	
+	public String getClassOFTweet(TweetFeatures currentTweet){
+		
 		
 		double distDrunk = Math.pow((meanDrunk.capitalCount-currentTweet.capitalCount), 2) +
 				Math.pow((meanDrunk.posNounToAdj-currentTweet.posNounToAdj), 2) +
@@ -77,11 +83,11 @@ public class RocchioAlgotihm {
 		
 		
 		if(distDrunk > distSober){
-			return "drunk";
+			return "sober";
 		}else if(distDrunk < distSober){
-			return "sober";
+			return "drunk";
 		}else{
-			return "sober";
+			return "drunk";
 		}
 		
 	}

@@ -36,43 +36,43 @@ public class kNNAlgorithm {
 			TweetFeatures ct = currentTweet;
 
 
-			double distance = Math.pow((Math.pow((dt.posNounToAdj - ct.posNounToAdj),2) 
+			double distance = (Math.pow((dt.posNounToAdj - ct.posNounToAdj),2) 
 					  + Math.pow((dt.posNounToAdv - ct.posNounToAdv),2)
 					  + Math.pow((dt.posAdjToAdv - ct.posAdjToAdv),2)
 					  + Math.pow((dt.repeatedChars - ct.repeatedChars),2)
 					  + Math.pow((dt.capitalCount - ct.capitalCount),2)
 					  + Math.pow((dt.wordCount - ct.wordCount),2)
-					  + Math.pow((dt.emoticonCount - ct.emoticonCount),2)),1/7);
+					  + Math.pow((dt.emoticonCount - ct.emoticonCount),2));
 
-			distances.get("drunk").add(distance);
+			distances.get("drunk").add(Math.sqrt(distance));
 		}
 
 		for(int i=0; i<soberDocs.size(); i++){
 			TweetFeatures dt = soberDocs.get(i); //dt = current drunk tweet
 			TweetFeatures ct = currentTweet;
 
-			double distance = Math.pow((Math.pow((dt.posNounToAdj - ct.posNounToAdj),2) 
+			double distance = (Math.pow((dt.posNounToAdj - ct.posNounToAdj),2) 
 					  + Math.pow((dt.posNounToAdv - ct.posNounToAdv),2)
 					  + Math.pow((dt.posAdjToAdv - ct.posAdjToAdv),2)
 					  + Math.pow((dt.repeatedChars - ct.repeatedChars),2)
 					  + Math.pow((dt.capitalCount - ct.capitalCount),2)
 					  + Math.pow((dt.wordCount - ct.wordCount),2)
-					  + Math.pow((dt.emoticonCount - ct.emoticonCount),2)),1/7);
+					  + Math.pow((dt.emoticonCount - ct.emoticonCount),2));
 
-			distances.get("sober").add(distance);
+			distances.get("sober").add(Math.sqrt(distance));
 		}
 
 		ArrayList<Double> drunkDistances = distances.get("drunk");
 		ArrayList<Double> soberDistances = distances.get("sober");
-		Collections.reverse(drunkDistances); //sort in descending order
-		Collections.reverse(soberDistances); //sort in descending order
+		Collections.sort(drunkDistances); //sort in descending order
+		Collections.sort(soberDistances); //sort in descending order
 
 		double[] max5 = new double[kNN];
 		int i = 0;
 		int j = 0;
 		int k = 0;
 		while(k<kNN){
-			if(drunkDistances.get(i) > soberDistances.get(j)){
+			if(drunkDistances.get(i) < soberDistances.get(j)){
 				max5[k] = drunkDistances.get(i);
 				i++;
 			}

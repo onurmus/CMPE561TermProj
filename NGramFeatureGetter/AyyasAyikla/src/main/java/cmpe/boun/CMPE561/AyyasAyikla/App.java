@@ -33,7 +33,7 @@ public class App
     	DBConnection conn = new DBConnection();
 		conn.startConnection();
 		
-		ReadFeatures rf = new ReadFeatures("1");
+		ReadFeatures rf = new ReadFeatures("2");
 		drunkDocs = rf.drunkDocs;
 		soberDocs = rf.soberDocs;
 		
@@ -108,8 +108,9 @@ public class App
 			currentTweet.posNounToAdv = NounToAdv;
 			currentTweet.capitalCount = map.get("capitalCount");
 			currentTweet.repeatedChars = map.get("hasRepeatedCharacters");
-			currentTweet.wordCount = map.get("capitalCount");
+			currentTweet.wordCount = map.get("length");
 			currentTweet.emoticonCount = map.get("emoticonCount");
+			
 			
 			String type = rocchio.getClassOFTweet(currentTweet);
 			if(type.equals("drunk")){
@@ -194,7 +195,7 @@ public class App
     
     
     public static HashMap<String,Integer> parseTweetFeatures(String tweet){
-        String[] tokens = tweet.split("\\s");
+        String[] tokens = tweet.split("\\s+");
 
         HashMap<String,Integer> features = new HashMap<String,Integer>();
 
