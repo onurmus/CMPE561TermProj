@@ -28,12 +28,21 @@ public class App
 	static public ArrayList<TweetFeatures> drunkDocs;
 	static public ArrayList<TweetFeatures> soberDocs;
 	
+	//drunk features in the form feature : count
+    static Map<String,HashMap<String,Integer>> drunkFeatures;
+
+    //sober features in the form feature : count
+    static Map<String,HashMap<String,Integer>> soberFeatures;
+	
+	
     public static void main( String[] args ) throws SQLException, FileNotFoundException, UnsupportedEncodingException
     {
     	DBConnection conn = new DBConnection();
 		conn.startConnection();
 		
-		ReadFeatures rf = new ReadFeatures("2");
+		ReadNGramFeatures rngF = new ReadNGramFeatures("1");
+		
+		/*ReadFeatures rf = new ReadFeatures("2");
 		drunkDocs = rf.drunkDocs;
 		soberDocs = rf.soberDocs;
 		
@@ -49,6 +58,7 @@ public class App
 		
 		int match =0;
 		int notMatch = 0;
+		
 		while(ds1Rs.next()){
 			
 			String tweetStr = ds1Rs.getString("tweet");
@@ -120,17 +130,35 @@ public class App
 			}
 		}
 		
-		System.out.println("match = " + match + "  : not match " + notMatch);
+		System.out.println("drunk = " + match + "  : sober " + notMatch);*/
 		
     }
     
+    
+    private static void printHashMaps2(String ds) throws FileNotFoundException, UnsupportedEncodingException{
+    	  
+
+        PrintStream out = new PrintStream(new File(ds+".txt"),"UTF-8");
+        //for(Map.Entry<String,HashMap<String, Integer>> entry : drunkFeatures.entrySet()){
+        for(Map.Entry<String,HashMap<String, Integer>> entry : soberFeatures.entrySet()){
+            out.print(entry.getKey() + " : < " + entry.getValue().get("hasRepeatedCharacters") + " , "
+                                              + entry.getValue().get("capitalCount") + " , "
+                                              + entry.getValue().get("length") + " , "
+                                              + entry.getValue().get("emoticonCount")
+                                              + " >");
+            out.println();
+            
+        }
+        out.close();
+    }
+    
     private static void getPOSTags(DBConnection conn) throws FileNotFoundException, UnsupportedEncodingException, SQLException{
-    	ResultSet ds1Rs = conn.getDataSet2Drunk();
+    	ResultSet ds1Rs = conn.getDataSet1Drunk();
 		
 		String saveFileName = "curTweet.txt";
 		MaxentTagger tagger = new MaxentTagger("models/english-left3words-distsim.tagger");
 		
-		PrintStream out = new PrintStream(new File("posDs2Drunk.txt"),"UTF-8");
+		PrintStream out = new PrintStream(new File("posDs1Drunk.txt"),"UTF-8");
 		
 		while(ds1Rs.next()){
 			String tweetStr = ds1Rs.getString("tweet");
@@ -195,7 +223,7 @@ public class App
     
     
     public static HashMap<String,Integer> parseTweetFeatures(String tweet){
-        String[] tokens = tweet.split("\\s+");
+        String[] tokens = parseTweet(tweet);
 
         HashMap<String,Integer> features = new HashMap<String,Integer>();
 
@@ -251,7 +279,7 @@ public class App
     	biGramMap = new HashMap<String,Integer>();
     	uniGramMap = new HashMap<String,Integer>();
 		
-		ResultSet ds1Rs = conn.getDataSet2Sober();
+		ResultSet ds1Rs = conn.getDataSet2Drunk();
 		
 		System.out.println("db den okudum");
 		
@@ -289,7 +317,7 @@ public class App
 		
 		System.out.println("parse işlemi bitti size is " + count);
 		
-		printHashMaps("ds2Sober");
+		printHashMaps("ds2Drunk");
 		
 		System.out.println(" bitti ");
     }

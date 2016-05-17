@@ -103,7 +103,7 @@ public class DBConnection {
     
     public ResultSet getDataSet2Sober() throws SQLException{
 		
-    	String query = "SELECT * FROM `dataset2v2` WHERE hashtag = '' ";		
+    	String query = "SELECT * FROM `dataset2v2` WHERE hashtag = '' LIMIT 5000";		
 		ResultSet ds1 =this.getStmt().executeQuery(query);
 		
 		return ds1;
@@ -112,6 +112,14 @@ public class DBConnection {
     public ResultSet getDataSet3Drunk() throws SQLException{
 		
     	String query = "SELECT * FROM `dataset3`";		
+		ResultSet ds1 =this.getStmt().executeQuery(query);
+		
+		return ds1;
+	}
+    
+    public ResultSet getDataSet3Sober() throws SQLException{
+		
+    	String query = "SELECT * FROM `dataset3v3` LIMIT 400";
 		ResultSet ds1 =this.getStmt().executeQuery(query);
 		
 		return ds1;
